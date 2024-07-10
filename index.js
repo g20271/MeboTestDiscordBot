@@ -42,5 +42,10 @@ client.on('messageCreate', async message => {
 
     } catch (error) {
         console.error(error);
+        try {
+            await meboApi.initChat();
+        } catch (error) {
+            console.error(error);
+        }
     }
 });
