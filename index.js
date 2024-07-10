@@ -19,6 +19,8 @@ client.login(config.discord_token);
 client.on('messageCreate', async message => {
     try {
         if (message.author.bot) return;
+        if (message.content === "") return;
+
         message.channel.sendTyping()
 
         let maxRetries = 5; // 再試行の最大回数
@@ -31,9 +33,11 @@ client.on('messageCreate', async message => {
                 console.dir(meboResult, { depth: null });
                 message.reply(meboResult.bestResponse.utterance.replaceAll("<br />", "\n"));
                 return; // 成功したので関数を終了
-            } else if (attempt < maxRetries && attempt % 2 == 0) {
-                message.reply("エラーが発生しました。再試行します。");
             } else if (attempt < maxRetries) {
+                if (attempt % 2 == 0) {
+                    message.reply("エラーが発生しました。再試行します。");
+                }
+
                 message.channel.sendTyping()
             } else {
                 message.reply("エラーが発生しました。");
@@ -43,6 +47,7 @@ client.on('messageCreate', async message => {
     } catch (error) {
         console.error(error);
         try {
+            message.reply("エラーが発生しました。初期化します。");
             await meboApi.initChat();
         } catch (error) {
             console.error(error);
