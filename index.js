@@ -25,7 +25,7 @@ client.login(config.discord_token);
 client.on('messageCreate', async message => {
     try {
         if (message.author.bot) return;
-        // if (message.content === "") return;
+        if (message.content === "" && message.attachments.size == 0) return;
         message.channel.sendTyping()
 
         let base64Image = "";
@@ -44,7 +44,11 @@ client.on('messageCreate', async message => {
 
                     if (dimensions.width <= 4032 && dimensions.height <= 4032) {
                         base64Image = buffer.toString('base64');
-                        console.log('Base64 Image Created' + base64Image);
+                        console.log('Base64 Image Created');
+
+                        if (message.content === "") {
+                            message.content = "この画像の意味を理解して、その解釈にあった返答をして";
+                        }
                     } else {
                         console.log('Image exceeds the size limit');
                     }
@@ -53,9 +57,9 @@ client.on('messageCreate', async message => {
                 }
             }
         }
-        
+
         message.channel.sendTyping()
-        
+
 
         let maxRetries = 8; // 再試行の最大回数
         let meboResult;
@@ -64,7 +68,6 @@ client.on('messageCreate', async message => {
             meboResult = await meboApi.chat(message.content, base64Image);
 
             if (meboResult.bestResponse.utterance != "") {
-                console.dir(meboResult, { depth: null });
                 message.reply(meboResult.bestResponse.utterance.replaceAll("<br />", "\n"));
                 return; // 成功したので関数を終了
             } else if (attempt < maxRetries) {

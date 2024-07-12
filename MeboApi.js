@@ -42,10 +42,12 @@ class MeboApi {
         
         if (this.lastRefreshAt + 480 < Math.floor(Date.now() / 1000)){
             await this._refreshToken()
+            await this._getAccountInfo()
         }
 
         if (this.isCheckExpire()) {
             await this._refreshToken()
+            await this._getAccountInfo()
         }
         return await this._chat(msg, base64Image)
     }
