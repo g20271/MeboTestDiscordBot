@@ -23,7 +23,7 @@ client.on('messageCreate', async message => {
 
         message.channel.sendTyping()
 
-        let maxRetries = 5; // 再試行の最大回数
+        let maxRetries = 8; // 再試行の最大回数
         let meboResult;
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -34,13 +34,13 @@ client.on('messageCreate', async message => {
                 message.reply(meboResult.bestResponse.utterance.replaceAll("<br />", "\n"));
                 return; // 成功したので関数を終了
             } else if (attempt < maxRetries) {
-                if (attempt % 2 == 0) {
-                    message.reply("エラーが発生しました。再試行します。");
+                if (attempt % 3 == 0) {
+                    message.reply(`混雑中です。再試行します。${attempt}回目/最大${maxRetries}回`);
                 }
 
                 message.channel.sendTyping()
             } else {
-                message.reply("エラーが発生しました。");
+                message.reply("現在混雑中です。回答を取得できませんでした。");
             }
         }
 
