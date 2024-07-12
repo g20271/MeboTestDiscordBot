@@ -30,7 +30,7 @@ class MeboApi {
         await this._chat("")
     }
 
-    async chat(msg) {
+    async chat(msg, base64Image = "") {
         if (this.idToken === "") {
             await this.initChat()
         }
@@ -47,7 +47,7 @@ class MeboApi {
         if (this.isCheckExpire()) {
             await this._refreshToken()
         }
-        return await this._chat(msg)
+        return await this._chat(msg, base64Image)
     }
 
     async _signupNewUser() {
@@ -174,7 +174,7 @@ class MeboApi {
     
     }
 
-    async _chat(msg) {
+    async _chat(msg, base64Image = "") {
         const options = {
             url: "https://api-mebo.dev/chat",
             method: "POST",
@@ -201,7 +201,7 @@ class MeboApi {
                     name: this.botname,
                     id: this.botid
                 },
-                base64Image: "",
+                base64Image: base64Image,
                 useStreaming: false
             }),
             mode: "cors"

@@ -1,12 +1,18 @@
 const request = require("request");
 const { Client, GatewayIntentBits, IntentsBitField } = require('discord.js');
 
+const axios = require('axios');
+const fs = require('fs');
+
+
 const client = new Client({ intents: [GatewayIntentBits.Guilds, IntentsBitField.Flags.GuildMessages, IntentsBitField.Flags.MessageContent] });
 
 const { MeboApi } = require("./MeboApi")
 const config = require('./config.json');
 
 const meboApi = new MeboApi(config.key, config.botid, config.version, config.botname)
+
+
 
 
 
@@ -19,15 +25,43 @@ client.login(config.discord_token);
 client.on('messageCreate', async message => {
     try {
         if (message.author.bot) return;
-        if (message.content === "") return;
-
+        // if (message.content === "") return;
         message.channel.sendTyping()
+
+        let base64Image = "";
+
+        if (message.attachments.size > 0) {
+            console.log('Image Attached');
+            const attachment = message.attachments.first();
+
+            if (attachment.contentType && attachment.contentType.startsWith('image/')) {
+                try {
+                    const response = await axios.get(attachment.url, { responseType: 'arraybuffer' });
+                    const buffer = Buffer.from(response.data, 'binary');
+
+                    // Load the image to get its dimensions
+                    const dimensions = await getImageDimensions(buffer);
+
+                    if (dimensions.width <= 4032 && dimensions.height <= 4032) {
+                        base64Image = buffer.toString('base64');
+                        console.log('Base64 Image Created' + base64Image);
+                    } else {
+                        console.log('Image exceeds the size limit');
+                    }
+                } catch (error) {
+                    console.error('Error fetching or processing image:', error);
+                }
+            }
+        }
+        
+        message.channel.sendTyping()
+        
 
         let maxRetries = 8; // 再試行の最大回数
         let meboResult;
 
         for (let attempt = 1; attempt <= maxRetries; attempt++) {
-            meboResult = await meboApi.chat(message.content);
+            meboResult = await meboApi.chat(message.content, base64Image);
 
             if (meboResult.bestResponse.utterance != "") {
                 console.dir(meboResult, { depth: null });
@@ -54,3 +88,15 @@ client.on('messageCreate', async message => {
         }
     }
 });
+
+function getImageDimensions(buffer) {
+    return new Promise((resolve, reject) => {
+        const sizeOf = require('image-size');
+        try {
+            const dimensions = sizeOf(buffer);
+            resolve(dimensions);
+        } catch (error) {
+            reject(error);
+        }
+    });
+}
