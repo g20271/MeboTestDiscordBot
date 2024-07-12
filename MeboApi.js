@@ -229,19 +229,13 @@ class MeboApi {
                 "Accept-Language": "ja,en-US;q=0.7,en;q=0.3",
                 "Content-Type": "application/x-www-form-urlencoded",
                 "X-Client-Version": "Firefox/JsCore/8.10.1/FirebaseCore-web",
-                "Sec-GPC": "1",
                 "Sec-Fetch-Dest": "empty",
                 "Sec-Fetch-Mode": "cors",
                 "Sec-Fetch-Site": "cross-site",
-                "Priority": "u=1",
-                "Pragma": "no-cache",
-                "Cache-Control": "no-cache"
+                "Priority": "u=1"
             },
             referrer: "https://mabo.work/",
-            body: JSON.stringify({
-                "grant_type": "refresh_token",
-                "refresh_token": this.refreshToken
-            }),
+            body: `grant_type=refresh_token&refresh_token=${this.refreshToken}`,
             mode: "cors"
         };
 
